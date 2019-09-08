@@ -1,0 +1,97 @@
+<!--
+ * @Autor: ErioY
+ * @Date: 2019-09-08 16:26:26
+ * @Email: 1973545559@qq.com
+ * @Github: https://github.com/ErioY
+ * @LastEditors: ErioY
+ * @LastEditTime: 2019-09-08 21:16:11
+ -->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>Document</title>
+</head>
+<body>
+    <div class="wrap">
+        <input type="text" value="0">商品1<br/>
+        <input type="text" value="0">商品2<br/>
+        <input type="text" value="0">商品3<br/>
+        <input type="text" value="0">商品4<br/>
+        <input type="text" value="0">商品5
+    </div>
+    <script>
+    // 给一个商品列表，用户可点击对应的输入框用鼠标滑轮上下滚动增加/减少商品数量
+    // 要求：利用事件委托来获取所有input元素、利用滚轮事件事件增加、减少商品数量
+    var oDiv = document.getElementsByTagName("div")[0];
+    delegation(oDiv,"input","click",function() {
+        var a = this;
+        doWheel(this,{
+            "up": function() {
+                a.value++;
+            },
+            "down": function() {
+                if (a.value > 0) {
+                    a.value--;
+                } 
+            }
+        });
+    })
+
+    // 事件委托封装(依托于事件监听器bind()函数)
+    function delegation(fEle,ele,attr,fn) {  // fEle表示元素，ele是标签名，要加引号，可以表示为 "li.box",
+        bind(fEle,attr,[function(ev) {
+            ev = ev || event;
+            var tar = ev.target || ev.srcElement;
+            var nodeList = fEle.querySelectorAll(ele);
+            for (var i = 0; i < nodeList.length; i++) {
+                if (nodeList[i] == tar) {
+                    fn.call(tar);
+                }
+            }
+        }]);
+    }    
+    
+    // 事件监听器兼容写法
+    function bind(obj,attr,fn) { // obj表示对象,attr表示事件,fn表示执行的时间函数
+        for (var i = 0; i < fn.length; i++) {
+            if (document.attachEvent) {
+                obj.attachEvent("on" + attr,function() {
+                    fn[fn.length - 1 - i].call(obj);
+                });
+            } else {
+                obj.addEventListener(attr,fn[i],false);
+            }
+        }
+    }
+
+    // 鼠标滚轮事件封装
+    function doWheel(obj,fns,stop) {  // obj,fns都为对象
+        var up = fns.up || function() {};
+        var down = fns.down || function() {};
+        var stop = stop === undefined ? true : stop;
+        // 判断是否火狐浏览器
+        var fire = window.navigator.userAgent.indexOf("Firefox") >= 0;
+        // console.log(fire);
+        if (fire) {
+            obj.addEventListener("DOMMouseScroll",
+            function() {
+                event.detail < 0 ? up() : down();
+                if (stop) {
+                    event.preventDefault();
+                }
+            },false)
+        } else {
+            obj.onmousewheel = function() {
+                event.wheelDelta > 0 ? up() : down();
+                if (stop) {
+                    return false;
+                }
+            }
+        }
+    }
+    </script>
+</body>
+</html>
